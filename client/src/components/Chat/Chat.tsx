@@ -3,7 +3,6 @@ import { Box, Button, Container, Stack, TextField } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
 export default function Chat() {
-    const socket = useRef<WebSocket>();
     const [message, setMessage] = useState("");
 
     const { connected, messages, users, sendMessage } = useChat();
@@ -28,7 +27,7 @@ export default function Chat() {
                     }}
                 >
                     {messages.map((message, index) => (
-                        <div key={index}>{message}</div>
+                        <div key={index}>{message?.payload?.text}</div>
                     ))}
                 </Box>
 

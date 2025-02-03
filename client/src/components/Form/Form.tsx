@@ -9,7 +9,7 @@ export default function Form() {
 
     const navigate = useNavigate();
 
-    const { connected } = useChat();
+    const { connect, connected } = useChat();
 
     if (connected) {
         navigate("/chat");
@@ -37,7 +37,9 @@ export default function Form() {
                     setRoom?.(event.target.value);
                 }}
             />
-            <Button variant="contained">Войти</Button>
+            <Button variant="contained" onClick={connect}>
+                Войти
+            </Button>
         </form>
     );
 }
