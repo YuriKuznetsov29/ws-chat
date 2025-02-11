@@ -2,18 +2,13 @@ import { Button, TextField } from "@mui/material";
 import cls from "./Form.module.scss";
 import { useContext } from "react";
 import { UserContext } from "@/app/Providers/UserProvider/UserProvider";
-import { useChat } from "@/hooks/useChat";
-import { useNavigate } from "react-router";
-export default function Form() {
+
+interface FormProps {
+    join: () => void;
+}
+
+export default function Form({ join }: FormProps) {
     const { name, room, setName, setRoom } = useContext(UserContext);
-
-    const navigate = useNavigate();
-
-    const { connect, connected } = useChat();
-
-    if (connected) {
-        navigate("/chat");
-    }
 
     return (
         <form className={cls.form}>
@@ -37,7 +32,13 @@ export default function Form() {
                     setRoom?.(event.target.value);
                 }}
             />
-            <Button variant="contained" onClick={connect}>
+            <Button
+                variant="contained"
+                onClick={() => {
+                    // console.log(typeof join, join);
+                    join();
+                }}
+            >
                 Войти
             </Button>
         </form>

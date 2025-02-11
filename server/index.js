@@ -4,12 +4,12 @@ const wss = new ws.Server({ port: 5000, host: "localhost" }, () => {
     console.log("Server is started");
 });
 
-const db = { rooms: [] };
+const db = { rooms: {} };
 
 wss.on("connection", (ws) => {
     ws.on("message", (message) => {
-        message = JSON.parse(message);
         console.log(message);
+        message = JSON.parse(message);
         switch (message.type) {
             case "join": {
                 const room = message.room;
@@ -23,10 +23,18 @@ wss.on("connection", (ws) => {
                 ws.room = message.room;
                 ws.user = message.user;
 
+                ws.send(JSON.stringify({ type: "join", joined: true }));
+
                 db.rooms[room].sockets.forEach((ws) => {
-                    ws.send(JSON.stringify(db.rooms[room]));
+                    const { users, messages } = db.rooms[room];
+                    ws.send(
+                        JSON.stringify({
+                            type: "message",
+                            users,
+                            messages,
+                        })
+                    );
                 });
-                console.log(db);
                 break;
             }
 
@@ -37,7 +45,14 @@ wss.on("connection", (ws) => {
 
                 db.rooms[ws.room].messages.push(message.payload);
                 db.rooms[ws.room].sockets.forEach((ws) => {
-                    ws.send(JSON.stringify(db.rooms[room]));
+                    const { users, messages } = db.rooms[ws.room];
+                    ws.send(
+                        JSON.stringify({
+                            type: "message",
+                            users,
+                            messages,
+                        })
+                    );
                 });
                 break;
             }
@@ -46,13 +61,13 @@ wss.on("connection", (ws) => {
 
     ws.on("close", () => {
         if (ws.room && db.rooms[ws.room]) {
-            console.log(ws.room, "close");
             const room = ws.room;
             db.rooms[room].sockets.delete(ws);
             delete db.rooms[room].users[ws.user];
             db.rooms[room].sockets.forEach((ws) => {
                 ws.send(JSON.stringify(db.rooms[room]));
             });
+            console.log(ws.room, "close", db.rooms[room].users[ws.user]);
         }
     });
 });
